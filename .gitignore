@@ -1,7 +1,110 @@
-.DS_Store
-applet
-application.linux32
-application.linux64
-application.windows32
-application.windows64
-application.macosx
+import ketai.sensors.*;//import kit called"ketai"
+
+KetaiSensor sensor;//use Ketaisensor to develop
+float accelerometerX, accelerometerY, accelerometerZ;
+
+PImage space;
+PImage star1;
+PImage star2;
+PImage star3;
+PImage cat1;
+PImage cat2;//fire cat
+
+
+Star [] stars;
+
+
+class Star {
+  float x;
+  float y;
+  PImage star1;
+  PImage star2;
+  PImage star3;
+  float speed = 2.5;
+  float stars = 3;
+
+  void drawStar() {
+    image(this.star1, this.x, this.y);
+    image(this.star2, this.x, this.y);
+    image(this.star3, this.x, this.y);
+  }
+
+  void move() {
+    this.y += this.speed;
+
+    // if the star is off-screen, pull it back up, go back to screen in a loop
+    if (this.y > height + 200) {
+      this.y = -200;
+    }
+  }
+}
+
+void setup() {
+  fullScreen();
+  //size(900, 1500);//how big is background  
+  star1 = loadImage("star1.png");//imprt image star1
+  star2 = loadImage("star2.png");//imprt image star1
+  star3 = loadImage("star3.png");//imprt image star1
+
+  stars = new Star[10];  
+  // fill up the enemies array, stars fall in random location and speed
+  for (int i = 0; i < stars.length; i++) {
+
+    Star newStar = new Star();
+    newStar.star1 = star1;
+    newStar.x = random(0, width);
+    newStar.y = random(0, height);
+    newStar.speed = random(0.7, 4.0);
+    stars[i] = newStar;//i means any stars in the star array, use newStar instead of star[i]
+  }
+
+  //sensor setup
+  sensor = new KetaiSensor(this);
+  sensor.start();
+
+  space = loadImage("space.png");
+  cat1 = loadImage("cat1.png");//put the image in the screen
+  cat2 = loadImage("cat2.png");
+}
+
+void draw() {
+  background(0);
+  image(space, width/2, height/2);
+
+  imageMode(CENTER);//draw image start from the center
+
+  // move and draw all the enemies
+  for (int i = 0; i < stars.length; i++) {
+    stars[i].move();
+    stars[i].drawStar();
+  }
+
+  float cat1X = map(accelerometerX, 10, -10, 0, width);
+  image(cat1, cat1X, height/1.5);//locatin of cat which move by accelerometer sensor
+}
+
+
+//void mousePressed() {
+//  for (int i = 0; i < stars.length; i++) {
+//    Star e = stars[i];
+//    boolean isMouseInside = isPointInside(mouseX, mouseY, e.x, e.y, e.star1.width, e.star1.height);
+//    if (isMouseInside) {
+//      e.y = -100;
+//    }
+//  }
+//}
+
+
+//boolean isPointInside(float pointX, float pointY, float rectX, float rectY, float rectW, float rectH) {
+//  return pointX > rectX && pointY > rectY 
+//    && pointX < rectX + rectW
+//    && pointY < rectY + rectH;
+//}
+
+
+void onAccelerometerEvent(float x, float y, float z)
+{
+  accelerometerX = x;
+  accelerometerY = y;
+  accelerometerZ = z;
+}
